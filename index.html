@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>L’Odyssée des Âmes Nomades – Journal de Bord</title>
+
+  <!-- Police Block Craft -->
+  <link href="https://fonts.cdnfonts.com/css/block-craft" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000000;
+      --green: #39ff14;
+      --green-dim: #1a8f0a;
+      --green-soft: #00cc66;
+      --card-bg: #0a0a0a;
+      --border: #1a3a1a;
+      --seq-bg: #051405;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Block Craft', 'Courier New', monospace;
+      min-height: 100vh;
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    /* ===== INTRO TERMINAL ===== */
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 18px;
+      overflow: hidden;
+    }
+
+    #boot-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+    }
+
+    .boot-terminal {
+      width: 100%;
+      max-width: 640px;
+      font-size: clamp(1.15rem, 4.8vw, 1.35rem);
+      line-height: 1.5;
+      color: var(--green);
+      text-shadow: 0 0 6px rgba(57, 255, 20, 0.35);
+    }
+
+    .boot-line {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .boot-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .boot-line.final {
+      margin-top: 18px;
+      font-size: 1.15em;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px rgba(57, 255, 20, 0.6);
+    }
+
+    .boot-start {
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 20px;
+    }
+
+    .boot-start .prompt {
+      opacity: 0.9;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .boot-start .hint {
+      margin-top: 14px;
+      font-size: 0.75em;
+      opacity: 0.55;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 1; }
+    }
+
+    .boot-cursor {
+      display: inline-block;
+      width: 0.55em;
+      height: 1.05em;
+      background: var(--green);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: blink 0.85s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .encrypt-bars {
+      display: inline;
+      letter-spacing: 2px;
+    }
+
+    .encrypt-bars span {
+      opacity: 0.25;
+      transition: opacity 0.12s ease;
+    }
+
+    .encrypt-bars span.on {
+      opacity: 1;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
+    }
+
+    /* Contenu principal caché jusqu'à la fin du boot */
+    #main-content {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.15s;
+    }
+
+    #main-content.ready {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 14px 80px;
+    }
+
+    /* ===== Contrôle enchaînement (haut droite) ===== */
+    .autoplay-control {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      min-width: 112px;
+      backdrop-filter: blur(6px);
+    }
+
+    .autoplay-label {
+      font-size: 0.78rem;
+      color: var(--green-soft);
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: 0.2px;
+      max-width: 120px;
+      opacity: 0.95;
+    }
+
+    .autoplay-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      background: var(--card-bg);
+      color: var(--green);
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s, color 0.2s;
+      user-select: none;
+    }
+
+    .autoplay-btn:active {
+      transform: scale(0.92);
+    }
+
+    .autoplay-btn.active {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 16px rgba(57, 255, 20, 0.55);
+    }
+
+    /* En-tête – bien descendu pour laisser la place au bouton fixe */
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+      padding-top: 130px;
+    }
+
+    .main-title {
+      font-size: clamp(1.4rem, 5.5vw, 2rem);
+      letter-spacing: 1px;
+      color: var(--green);
+      text-shadow: 0 0 14px rgba(57, 255, 20, 0.45);
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .sub-title {
+      font-size: clamp(1.05rem, 4vw, 1.25rem);
+      color: var(--green-soft);
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      font-size: 0.85rem;
+      color: var(--green-soft);
+      opacity: 0.7;
+      letter-spacing: 0.5px;
+    }
+
+    /* Séquences – titres agrandis */
+    .sequence {
+      margin-bottom: 32px;
+    }
+
+    .sequence-title {
+      font-size: clamp(1.25rem, 5vw, 1.5rem);
+      color: var(--green);
+      background: var(--seq-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 14px;
+      margin-bottom: 18px;
+      text-align: center;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+    }
+
+    /* Chapitres – textes agrandis */
+    .chapters {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chapter {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .chapter:active,
+    .chapter:focus-within {
+      border-color: var(--green);
+      box-shadow: 0 0 14px rgba(57, 255, 20, 0.18);
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chapter-number {
+      flex-shrink: 0;
+      min-width: 52px;
+      height: 40px;
+      background: var(--green-dim);
+      color: #000;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      font-weight: bold;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .chapter-title {
+      font-size: clamp(1.15rem, 4.8vw, 1.35rem);
+      color: var(--green);
+      flex: 1;
+      line-height: 1.4;
+      padding-top: 5px;
+    }
+
+    /* Lecteur audio – contrôles en vert */
+    audio {
+      width: 100%;
+      height: 48px;
+      border-radius: 8px;
+      outline: none;
+      accent-color: #39ff14;
+    }
+
+    audio::-webkit-media-controls-panel {
+      background: #111;
+    }
+
+    /* Bouton play, volume, curseur volume en vert */
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-mute-button,
+    audio::-webkit-media-controls-volume-slider,
+    audio::-webkit-media-controls-timeline {
+      filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+    }
+
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display {
+      color: #39ff14;
+    }
+
+    /* Masquer le menu natif (trois points) autant que possible */
+    audio::-webkit-media-controls-overflow-button {
+      display: none !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Conteneur audio + bouton ⋮ personnalisé */
+    .audio-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .audio-wrap audio {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Bouton trois points : points verts, sans fond */
+    .speed-btn {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #39ff14;
+      font-size: 1.5rem;
+      font-weight: bold;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+      user-select: none;
+      padding: 0;
+      transition: color 0.15s, transform 0.1s, text-shadow 0.15s;
+    }
+
+    .speed-btn:active {
+      color: #2ecc12;
+      transform: scale(0.94);
+      text-shadow: 0 0 12px rgba(57, 255, 20, 0.7);
+    }
+
+    .speed-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      bottom: 44px;
+      background: #0a0a0a;
+      border: 1px solid #39ff14;
+      border-radius: 8px;
+      padding: 6px 0;
+      min-width: 110px;
+      z-index: 50;
+      box-shadow: 0 0 14px rgba(57, 255, 20, 0.25);
+    }
+
+    .speed-menu.open {
+      display: block;
+    }
+
+    .speed-menu button {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #39ff14;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 8px 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .speed-menu button:hover,
+    .speed-menu button.active {
+      background: rgba(57, 255, 20, 0.15);
+    }
+
+    .speed-menu button.active {
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--green-soft);
+      opacity: 0.65;
+    }
+
+    /* ===== Mobile (Xiaomi Redmi Note 14/15 et petits écrans) ===== */
+    @media (max-width: 480px) {
+      .container {
+        padding: 12px 10px 60px;
+      }
+
+      .autoplay-control {
+        top: 8px;
+        right: 8px;
+        padding: 7px 9px;
+        min-width: 100px;
+      }
+
+      .autoplay-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+      }
+
+      .autoplay-label {
+        font-size: 0.7rem;
+      }
+
+      /* Beaucoup d’espace en haut pour que le bouton ne chevauche jamais le titre */
+      header {
+        padding-top: 145px;
+      }
+
+      .main-title {
+        font-size: clamp(1.35rem, 6vw, 1.7rem);
+      }
+
+      .sub-title {
+        font-size: clamp(1rem, 4.2vw, 1.2rem);
+      }
+
+      .sequence-title {
+        font-size: clamp(1.3rem, 5.5vw, 1.55rem);
+        padding: 15px 12px;
+      }
+
+      .chapter {
+        padding: 16px 12px;
+      }
+
+      .chapter-number {
+        min-width: 54px;
+        height: 42px;
+        font-size: 2rem;
+        line-height: 1;
+      }
+
+      .chapter-title {
+        font-size: clamp(1.2rem, 5vw, 1.4rem);
+      }
+
+      audio {
+        height: 52px;
+      }
+
+      .boot-terminal {
+        font-size: clamp(1.2rem, 5vw, 1.4rem);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ÉCRAN DE BOOT / CONNEXION ========== -->
+  <div id="boot-screen">
+    <div class="boot-terminal" id="bootTerminal"></div>
+  </div>
+
+  <!-- ========== CONTENU PRINCIPAL ========== -->
+  <div id="main-content">
+
+  <!-- Contrôle d’enchaînement automatique (fixe haut droite) -->
+  <div class="autoplay-control">
+    <div class="autoplay-label" id="autoplayLabel">Chapitres isolés</div>
+    <button class="autoplay-btn" id="autoplayBtn" onclick="toggleAutoplay()" title="Activer / désactiver l’enchaînement">
+      ⏸
+    </button>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1 class="main-title">L’Odyssée des Âmes Nomades</h1>
+      <p class="sub-title">Cœurs Libres parmi les Étoiles</p>
+      <p class="meta">Journal de Bord • Livre audio</p>
+    </header>
+
+    <!-- ========== SÉQUENCE 1 ========== -->
+    <section class="sequence">
+      <h2 class="sequence-title">Séquence 1 — Les racines brisées</h2>
+      <div class="chapters">
+
+        <article class="chapter" data-chapter="1">
+          <div class="chapter-header" onclick="togglePlay(1)">
+            <div class="chapter-number">01</div>
+            <h3 class="chapter-title">Entrée 01.472-O : Les échos d’un passé volé</h3>
+          </div>
+          <audio id="audio-1" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/01-entree-01.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="2">
+          <div class="chapter-header" onclick="togglePlay(2)">
+            <div class="chapter-number">02</div>
+            <h3 class="chapter-title">Entrée 02.819-K : Le caméléon dans la machine</h3>
+          </div>
+          <audio id="audio-2" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/01-entree-02.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="3">
+          <div class="chapter-header" onclick="togglePlay(3)">
+            <div class="chapter-number">03</div>
+            <h3 class="chapter-title">Entrée 03.336-♥ : Connexions partagées</h3>
+          </div>
+          <audio id="audio-3" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/01-entree-03.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="4">
+          <div class="chapter-header" onclick="togglePlay(4)">
+            <div class="chapter-number">04</div>
+            <h3 class="chapter-title">Entrée 04.587-P : Renaissance</h3>
+          </div>
+          <audio id="audio-4" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/01-entree-04.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="5">
+          <div class="chapter-header" onclick="togglePlay(5)">
+            <div class="chapter-number">05</div>
+            <h3 class="chapter-title">Entrée 05.336-G : Nouvelle famille</h3>
+          </div>
+          <audio id="audio-5" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/01-entree-05.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ========== SÉQUENCE 2 ========== -->
+    <section class="sequence">
+      <h2 class="sequence-title">Séquence 2 — L’éveil mutuel</h2>
+      <div class="chapters">
+
+        <article class="chapter" data-chapter="6">
+          <div class="chapter-header" onclick="togglePlay(6)">
+            <div class="chapter-number">06</div>
+            <h3 class="chapter-title">Entrée 06.214-A : Alliance des ombres stellaires</h3>
+          </div>
+          <audio id="audio-6" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/02-entree-06.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="7">
+          <div class="chapter-header" onclick="togglePlay(7)">
+            <div class="chapter-number">07</div>
+            <h3 class="chapter-title">Entrée 07.657-★ : Éclats d’entraînement</h3>
+          </div>
+          <audio id="audio-7" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/02-entree-07.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="8">
+          <div class="chapter-header" onclick="togglePlay(8)">
+            <div class="chapter-number">08</div>
+            <h3 class="chapter-title">Entrée 08.391-Ω : Murmures d’une lune oubliée</h3>
+          </div>
+          <audio id="audio-8" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/02-entree-08.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="9">
+          <div class="chapter-header" onclick="togglePlay(9)">
+            <div class="chapter-number">09</div>
+            <h3 class="chapter-title">Entrée 09.528-R : Rythmes clandestins</h3>
+          </div>
+          <audio id="audio-9" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/02-entree-09.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="10">
+          <div class="chapter-header" onclick="togglePlay(10)">
+            <div class="chapter-number">10</div>
+            <h3 class="chapter-title">Entrée 10.473-N : Ombres numériques</h3>
+          </div>
+          <audio id="audio-10" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/02-entree-10.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ========== SÉQUENCE 3 ========== -->
+    <section class="sequence">
+      <h2 class="sequence-title">Séquence 3 — L’étincelle rebelle</h2>
+      <div class="chapters">
+
+        <article class="chapter" data-chapter="11">
+          <div class="chapter-header" onclick="togglePlay(11)">
+            <div class="chapter-number">11</div>
+            <h3 class="chapter-title">Entrée 11.862-U : L’écho urgent dans le vide</h3>
+          </div>
+          <audio id="audio-11" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/03-entree-11.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="12">
+          <div class="chapter-header" onclick="togglePlay(12)">
+            <div class="chapter-number">12</div>
+            <h3 class="chapter-title">Entrée 12.139-C : Contre-courants dans la galaxie</h3>
+          </div>
+          <audio id="audio-12" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/03-entree-12.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="13">
+          <div class="chapter-header" onclick="togglePlay(13)">
+            <div class="chapter-number">13</div>
+            <h3 class="chapter-title">Entrée 13.746-I : L’infiltration silencieuse</h3>
+          </div>
+          <audio id="audio-13" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/03-entree-13.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="14">
+          <div class="chapter-header" onclick="togglePlay(14)">
+            <div class="chapter-number">14</div>
+            <h3 class="chapter-title">Entrée 14.295-F : L’éclair dans les ténèbres</h3>
+          </div>
+          <audio id="audio-14" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/03-entree-14.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+        <article class="chapter" data-chapter="15">
+          <div class="chapter-header" onclick="togglePlay(15)">
+            <div class="chapter-number">15</div>
+            <h3 class="chapter-title">Entrée 15.917-∞ : Lumières persistantes</h3>
+          </div>
+          <audio id="audio-15" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
+            <source src="audio/03-entree-15.mp3" type="audio/mpeg">
+          </audio>
+        </article>
+
+      </div>
+    </section>
+
+    <footer>
+      Créé par Charly pour Aurélie<br>
+      Lecture en ligne • Fichiers locaux
+    </footer>
+  </div>
+
+  </div><!-- /#main-content -->
+
+  <!-- Sons d’interface -->
+  <audio id="sfx-click" preload="auto" src="mixkit-sci-fi-click-900.mp3"></audio>
+  <audio id="sfx-toggle" preload="auto" src="mixkit-alien-technology-button-3118.mp3"></audio>
+
+  <script>
+    /* ========== BOOT SEQUENCE ========== */
+    const bootMessages = [
+      { text: "[Connexion établie...]", delay: 520 },
+      { text: "[Paquet de données détecté]", delay: 480 },
+      { text: "[Analyse de sécurité...]", delay: 560 },
+      { text: "[Anti-malware : ACTIVÉ]", delay: 420 },
+      { text: "[Recherche d'intrusions...]", delay: 580 },
+      { text: "[Aucune menace détectée]", delay: 460 },
+      { text: "[Chiffrement : ", special: "encrypt", delay: 180 },
+      { text: "[Algorithme de décryptage initialisé...]", delay: 520 },
+      { text: "", special: "percent", delay: 380 },
+      { text: "[Décryptage terminé]", delay: 440 },
+      { text: "[Archive récupérée : LES ÉCHOS D’UN PASSÉ VOLÉ]", delay: 620 },
+      { text: "[LECTURE.]", delay: 950, final: true }
+    ];
+
+    function playClick(volume = 1) {
+      const sfx = document.getElementById('sfx-click');
+      if (!sfx) return;
+      try {
+        sfx.pause();
+        sfx.currentTime = 0;
+        sfx.volume = Math.max(0, Math.min(1, volume));
+        const p = sfx.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch (e) {}
+    }
+
+    function runBootSequence() {
+      const terminal = document.getElementById('bootTerminal');
+      const bootScreen = document.getElementById('boot-screen');
+      const mainContent = document.getElementById('main-content');
+      let i = 0;
+
+      function showNext() {
+        if (i >= bootMessages.length) {
+          // Pause après LECTURE. puis disparition
+          setTimeout(() => {
+            bootScreen.classList.add('hidden');
+            mainContent.classList.add('ready');
+            setTimeout(() => {
+              bootScreen.style.display = 'none';
+            }, 750);
+          }, 1100);
+          return;
+        }
+
+        const msg = bootMessages[i];
+        const line = document.createElement('div');
+        line.className = 'boot-line' + (msg.final ? ' final' : '');
+
+        if (msg.special === 'encrypt') {
+          // Construction de la ligne de chiffrement avec barres progressives
+          line.innerHTML = '[Chiffrement : <span class="encrypt-bars" id="encryptBars"></span> ]';
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+
+          const barsContainer = document.getElementById('encryptBars');
+          const bars = [];
+          for (let b = 0; b < 10; b++) {
+            const span = document.createElement('span');
+            span.textContent = '█';
+            barsContainer.appendChild(span);
+            bars.push(span);
+          }
+
+          // Allumage progressif des carrés (plus lent)
+          let barIndex = 0;
+          function lightNextBar() {
+            if (barIndex < bars.length) {
+              bars[barIndex].classList.add('on');
+              barIndex++;
+              setTimeout(lightNextBar, 200);
+            } else {
+              setTimeout(() => {
+                i++;
+                showNext();
+              }, 450);
+            }
+          }
+          setTimeout(lightNextBar, 220);
+
+        } else if (msg.special === 'percent') {
+          // Pourcentages qui apparaissent un par un et restent affichés
+          // Son uniquement sur le premier (12 %), pas sur 37 / 68 / 94
+          const steps = [
+            '[12 %...]',
+            '[12 %... 37 %...]',
+            '[12 %... 37 %... 68 %...]',
+            '[12 %... 37 %... 68 %... 94 %...]'
+          ];
+          line.textContent = steps[0];
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+
+          let step = 1;
+          function nextPercent() {
+            if (step < steps.length) {
+              line.textContent = steps[step];
+              // pas de son pour 37 %, 68 %, 94 %
+              step++;
+              setTimeout(nextPercent, 480);
+            } else {
+              i++;
+              setTimeout(showNext, 420);
+            }
+          }
+          setTimeout(nextPercent, 520);
+
+        } else {
+          line.textContent = msg.text;
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+          i++;
+          setTimeout(showNext, msg.delay);
+        }
+      }
+
+      // Démarrage immédiat de la séquence (après interaction utilisateur)
+      setTimeout(showNext, 280);
+    }
+
+    function showStartPrompt() {
+      const terminal = document.getElementById('bootTerminal');
+      terminal.innerHTML = '';
+      const start = document.createElement('div');
+      start.className = 'boot-start';
+      start.innerHTML = '<div class="prompt">[ TOUCHER POUR ÉTABLIR LA CONNEXION ]</div><div class="hint">Appuyez n’importe où pour continuer</div>';
+      terminal.appendChild(start);
+
+      function begin() {
+        // Débloque l’audio grâce à l’interaction utilisateur
+        playClick(0.25);
+        terminal.innerHTML = '';
+        document.removeEventListener('click', begin);
+        document.removeEventListener('touchstart', begin);
+        runBootSequence();
+      }
+
+      // Un seul écouteur (click + touch)
+      document.addEventListener('click', begin, { once: true });
+      document.addEventListener('touchstart', begin, { once: true, passive: true });
+    }
+
+    // Affiche l’invite au chargement (nécessaire pour autoriser le son)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showStartPrompt);
+    } else {
+      showStartPrompt();
+    }
+
+    /* ========== LECTEUR ORIGINAL ========== */
+    let autoplayEnabled = false;
+    const TOTAL_CHAPTERS = 15;
+
+    function playToggle() {
+      const sfx = document.getElementById('sfx-toggle');
+      if (!sfx) return;
+      sfx.currentTime = 0;
+      sfx.play().catch(() => {});
+    }
+
+    function toggleAutoplay() {
+      autoplayEnabled = !autoplayEnabled;
+      playToggle();
+
+      const btn = document.getElementById('autoplayBtn');
+      const label = document.getElementById('autoplayLabel');
+
+      if (autoplayEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '▶▶';
+        label.textContent = 'Enchaînement automatique';
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '⏸';
+        label.textContent = 'Chapitres isolés';
+      }
+    }
+
+    function togglePlay(num) {
+      playClick();
+
+      const audio = document.getElementById('audio-' + num);
+      if (!audio) return;
+
+      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+        if (a !== audio && !a.paused) a.pause();
+      });
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+    }
+
+    function setupAutoplayChain() {
+      for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
+        const audio = document.getElementById('audio-' + i);
+        if (!audio) continue;
+
+        audio.addEventListener('ended', function () {
+          if (!autoplayEnabled) return;
+          const next = i + 1;
+          if (next > TOTAL_CHAPTERS) return;
+          const nextAudio = document.getElementById('audio-' + next);
+          if (nextAudio) {
+            setTimeout(() => {
+              nextAudio.play().catch(() => {});
+            }, 450);
+          }
+        });
+
+        audio.addEventListener('play', function () {
+          if (!autoplayEnabled || audio.currentTime < 0.3) {
+            playClick();
+          }
+        });
+      }
+    }
+
+    setupAutoplayChain();
+
+    /* ===== Bouton ⋮ personnalisé (fond vert + points noirs) ===== */
+    function setupCustomSpeedButtons() {
+      const speeds = [0.75, 1, 1.25, 1.5, 2];
+
+      document.querySelectorAll('audio[id^="audio-"]').forEach(audio => {
+        if (audio.parentElement.classList.contains('audio-wrap')) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'audio-wrap';
+        audio.parentNode.insertBefore(wrap, audio);
+        wrap.appendChild(audio);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'speed-btn';
+        btn.title = 'Vitesse de lecture';
+        btn.setAttribute('aria-label', 'Vitesse de lecture');
+        btn.textContent = '⋮';
+        wrap.appendChild(btn);
+
+        const menu = document.createElement('div');
+        menu.className = 'speed-menu';
+        speeds.forEach(s => {
+          const opt = document.createElement('button');
+          opt.type = 'button';
+          opt.textContent = s === 1 ? '1× (normal)' : s + '×';
+          opt.dataset.speed = s;
+          if (s === 1) opt.classList.add('active');
+          opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            audio.playbackRate = s;
+            menu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            opt.classList.add('active');
+            menu.classList.remove('open');
+            playClick();
+          });
+          menu.appendChild(opt);
+        });
+        wrap.appendChild(menu);
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Ferme les autres menus
+          document.querySelectorAll('.speed-menu.open').forEach(m => {
+            if (m !== menu) m.classList.remove('open');
+          });
+          menu.classList.toggle('open');
+          playClick();
+        });
+      });
+
+      // Ferme le menu si on clique ailleurs
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.speed-menu.open').forEach(m => m.classList.remove('open'));
+      });
+    }
+
+    setupCustomSpeedButtons();
+
+    document.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+  </script>
+</body>
+</html>
