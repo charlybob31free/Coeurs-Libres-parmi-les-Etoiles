@@ -933,6 +933,12 @@
         });
 
         audio.addEventListener('play', function () {
+          // Stoppe tous les autres audios dès qu'un nouveau démarre
+          // (que ce soit via le titre ou le bouton play natif)
+          document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+            if (a !== audio && !a.paused) a.pause();
+          });
+
           if (!autoplayEnabled || audio.currentTime < 0.3) {
             playClick();
           }
