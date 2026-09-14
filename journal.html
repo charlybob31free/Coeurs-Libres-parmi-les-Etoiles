@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#000000">
   <title>L’Odyssée des Âmes Nomades – Journal de Bord</title>
 
-  <!-- Police Block Craft -->
   <link href="https://fonts.cdnfonts.com/css/block-craft" rel="stylesheet">
 
   <style>
@@ -39,13 +38,46 @@
     .container {
       max-width: 720px;
       margin: 0 auto;
-      padding: 20px 14px 80px;
+      padding: 20px 14px 120px;
+    }
+
+    /* ===== Barre de progression globale (haut) ===== */
+    .global-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #0a1a0a;
+      z-index: 200;
+    }
+
+    .global-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green-dim), var(--green));
+      box-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+      transition: width 0.25s linear;
+    }
+
+    .progress-label {
+      position: fixed;
+      top: 8px;
+      left: 10px;
+      z-index: 201;
+      font-size: 0.7rem;
+      color: var(--green-soft);
+      opacity: 0.85;
+      background: rgba(0,0,0,0.75);
+      padding: 3px 8px;
+      border-radius: 6px;
+      pointer-events: none;
     }
 
     /* ===== Contrôle enchaînement (haut droite) ===== */
     .autoplay-control {
       position: fixed;
-      top: 10px;
+      top: 18px;
       right: 10px;
       z-index: 100;
       display: flex;
@@ -86,9 +118,7 @@
       user-select: none;
     }
 
-    .autoplay-btn:active {
-      transform: scale(0.92);
-    }
+    .autoplay-btn:active { transform: scale(0.92); }
 
     .autoplay-btn.active {
       background: var(--green);
@@ -98,8 +128,8 @@
 
     header {
       text-align: center;
-      margin-bottom: 36px;
-      padding-top: 130px;
+      margin-bottom: 28px;
+      padding-top: 140px;
     }
 
     .main-title {
@@ -115,7 +145,16 @@
       font-size: clamp(1.05rem, 4vw, 1.25rem);
       color: var(--green-soft);
       opacity: 0.9;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .sequence-hook {
+      font-size: clamp(0.9rem, 3.5vw, 1.05rem);
+      color: var(--green);
+      opacity: 0.8;
+      margin-bottom: 8px;
+      min-height: 1.4em;
+      transition: opacity 0.3s;
     }
 
     .meta {
@@ -123,6 +162,49 @@
       color: var(--green-soft);
       opacity: 0.7;
       letter-spacing: 0.5px;
+    }
+
+    /* Bannière reprise */
+    .resume-banner {
+      display: none;
+      background: var(--seq-bg);
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      text-align: center;
+      box-shadow: 0 0 16px rgba(57, 255, 20, 0.2);
+    }
+
+    .resume-banner.visible { display: block; }
+
+    .resume-banner p {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--green);
+    }
+
+    .resume-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .resume-actions button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--green);
+      cursor: pointer;
+      background: var(--green);
+      color: #000;
+    }
+
+    .resume-actions button.secondary {
+      background: transparent;
+      color: var(--green);
     }
 
     .sequence {
@@ -153,13 +235,19 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 18px 14px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
     }
 
     .chapter:active,
     .chapter:focus-within {
       border-color: var(--green);
       box-shadow: 0 0 14px rgba(57, 255, 20, 0.18);
+    }
+
+    .chapter.playing {
+      border-color: var(--green);
+      background: #0a1a0a;
+      box-shadow: 0 0 18px rgba(57, 255, 20, 0.28);
     }
 
     .chapter-header {
@@ -187,6 +275,11 @@
       line-height: 1;
     }
 
+    .chapter.playing .chapter-number {
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.45);
+    }
+
     .chapter-title {
       font-size: clamp(1.15rem, 4.8vw, 1.35rem);
       color: var(--green);
@@ -203,9 +296,7 @@
       accent-color: #39ff14;
     }
 
-    audio::-webkit-media-controls-panel {
-      background: #111;
-    }
+    audio::-webkit-media-controls-panel { background: #111; }
 
     audio::-webkit-media-controls-play-button,
     audio::-webkit-media-controls-mute-button,
@@ -256,13 +347,11 @@
       text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
       user-select: none;
       padding: 0;
-      transition: color 0.15s, transform 0.1s, text-shadow 0.15s;
     }
 
     .speed-btn:active {
       color: #2ecc12;
       transform: scale(0.94);
-      text-shadow: 0 0 12px rgba(57, 255, 20, 0.7);
     }
 
     .speed-menu {
@@ -279,9 +368,7 @@
       box-shadow: 0 0 14px rgba(57, 255, 20, 0.25);
     }
 
-    .speed-menu.open {
-      display: block;
-    }
+    .speed-menu.open { display: block; }
 
     .speed-menu button {
       display: block;
@@ -301,9 +388,7 @@
       background: rgba(57, 255, 20, 0.15);
     }
 
-    .speed-menu button.active {
-      font-weight: bold;
-    }
+    .speed-menu button.active { font-weight: bold; }
 
     footer {
       text-align: center;
@@ -315,13 +400,73 @@
       opacity: 0.65;
     }
 
+    /* ===== Barre de contrôle fixe en bas ===== */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 150;
+      background: rgba(0, 0, 0, 0.94);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .bottom-bar button {
+      font-family: inherit;
+      border: 2px solid var(--green);
+      background: var(--card-bg);
+      color: var(--green);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      user-select: none;
+    }
+
+    .bottom-bar button:active { transform: scale(0.93); }
+
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      font-size: 1.35rem;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .global-pause-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      font-size: 1.7rem;
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 18px rgba(57, 255, 20, 0.45);
+    }
+
+    .global-pause-btn.is-paused {
+      background: var(--card-bg);
+      color: var(--green);
+      box-shadow: none;
+    }
+
     @media (max-width: 480px) {
       .container {
-        padding: 12px 10px 60px;
+        padding: 12px 10px 120px;
       }
 
       .autoplay-control {
-        top: 8px;
+        top: 16px;
         right: 8px;
         padding: 7px 9px;
         min-width: 100px;
@@ -333,13 +478,9 @@
         font-size: 1.2rem;
       }
 
-      .autoplay-label {
-        font-size: 0.7rem;
-      }
+      .autoplay-label { font-size: 0.7rem; }
 
-      header {
-        padding-top: 145px;
-      }
+      header { padding-top: 150px; }
 
       .main-title {
         font-size: clamp(1.35rem, 6vw, 1.7rem);
@@ -354,30 +495,42 @@
         padding: 15px 12px;
       }
 
-      .chapter {
-        padding: 16px 12px;
-      }
+      .chapter { padding: 16px 12px; }
 
       .chapter-number {
         min-width: 54px;
         height: 42px;
         font-size: 2rem;
-        line-height: 1;
       }
 
       .chapter-title {
         font-size: clamp(1.2rem, 5vw, 1.4rem);
       }
 
-      audio {
-        height: 52px;
+      audio { height: 52px; }
+
+      .nav-btn {
+        width: 46px;
+        height: 46px;
+      }
+
+      .global-pause-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.6rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Contrôle d’enchaînement automatique (fixe haut droite) -->
+  <!-- Barre de progression globale -->
+  <div class="global-progress">
+    <div class="global-progress-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">— / 15</div>
+
+  <!-- Contrôle enchaînement -->
   <div class="autoplay-control">
     <div class="autoplay-label" id="autoplayLabel">Enchaînement automatique</div>
     <button class="autoplay-btn active" id="autoplayBtn" onclick="toggleAutoplay()" title="Activer / désactiver l’enchaînement">
@@ -389,11 +542,21 @@
     <header>
       <h1 class="main-title">L’Odyssée des Âmes Nomades</h1>
       <p class="sub-title">Cœurs Libres parmi les Étoiles</p>
+      <p class="sequence-hook" id="sequenceHook">Les racines brisées</p>
       <p class="meta">Journal de Bord • Livre audio</p>
     </header>
 
+    <!-- Bannière de reprise -->
+    <div class="resume-banner" id="resumeBanner">
+      <p id="resumeText">Reprendre là où vous vous êtes arrêté·e ?</p>
+      <div class="resume-actions">
+        <button type="button" onclick="resumeFromSave()">Reprendre</button>
+        <button type="button" class="secondary" onclick="dismissResume()">Recommencer</button>
+      </div>
+    </div>
+
     <!-- ========== SÉQUENCE 1 ========== -->
-    <section class="sequence">
+    <section class="sequence" data-seq="1">
       <h2 class="sequence-title">Séquence 1 — Les racines brisées</h2>
       <div class="chapters">
 
@@ -451,7 +614,7 @@
     </section>
 
     <!-- ========== SÉQUENCE 2 ========== -->
-    <section class="sequence">
+    <section class="sequence" data-seq="2">
       <h2 class="sequence-title">Séquence 2 — L’éveil mutuel</h2>
       <div class="chapters">
 
@@ -509,7 +672,7 @@
     </section>
 
     <!-- ========== SÉQUENCE 3 ========== -->
-    <section class="sequence">
+    <section class="sequence" data-seq="3">
       <h2 class="sequence-title">Séquence 3 — L’étincelle rebelle</h2>
       <div class="chapters">
 
@@ -572,7 +735,13 @@
     </footer>
   </div>
 
-  <!-- Sons d’interface -->
+  <!-- Barre de navigation fixe en bas -->
+  <div class="bottom-bar">
+    <button type="button" class="nav-btn" id="prevBtn" onclick="goPrev()" title="Chapitre précédent">⏮</button>
+    <button type="button" class="global-pause-btn is-paused" id="globalPauseBtn" onclick="toggleGlobalPause()" title="Lecture / Pause">▶</button>
+    <button type="button" class="nav-btn" id="nextBtn" onclick="goNext()" title="Chapitre suivant">⏭</button>
+  </div>
+
   <audio id="sfx-click" preload="auto" src="mixkit-sci-fi-click-900.mp3"></audio>
   <audio id="sfx-toggle" preload="auto" src="mixkit-alien-technology-button-3118.mp3"></audio>
 
@@ -580,6 +749,13 @@
     let autoplayEnabled = true;
     const TOTAL_CHAPTERS = 15;
     let currentPlaying = 0;
+    let preloadedNearEnd = {}; // évite de re-précharger en boucle
+    const STORAGE_KEY = 'odyssee-journal-position';
+    const HOOKS = {
+      1: 'Les racines brisées',
+      2: 'L’éveil mutuel',
+      3: 'L’étincelle rebelle'
+    };
 
     function playClick(volume = 1) {
       const sfx = document.getElementById('sfx-click');
@@ -600,6 +776,147 @@
       sfx.play().catch(() => {});
     }
 
+    function sequenceOf(num) {
+      if (num <= 5) return 1;
+      if (num <= 10) return 2;
+      return 3;
+    }
+
+    function updateSequenceHook(num) {
+      const el = document.getElementById('sequenceHook');
+      if (!el) return;
+      const seq = num > 0 ? sequenceOf(num) : 1;
+      el.textContent = HOOKS[seq] || HOOKS[1];
+    }
+
+    function highlightChapter(num) {
+      document.querySelectorAll('.chapter').forEach(ch => {
+        ch.classList.toggle('playing', Number(ch.dataset.chapter) === num);
+      });
+    }
+
+    function updateNavButtons() {
+      const prev = document.getElementById('prevBtn');
+      const next = document.getElementById('nextBtn');
+      const ref = currentPlaying || 1;
+      if (prev) prev.disabled = ref <= 1;
+      if (next) next.disabled = ref >= TOTAL_CHAPTERS;
+    }
+
+    function updateGlobalPauseBtn() {
+      const btn = document.getElementById('globalPauseBtn');
+      if (!btn) return;
+      const audio = currentPlaying ? document.getElementById('audio-' + currentPlaying) : null;
+      const isPlaying = audio && !audio.paused;
+      if (isPlaying) {
+        btn.classList.remove('is-paused');
+        btn.textContent = '⏸';
+      } else {
+        btn.classList.add('is-paused');
+        btn.textContent = '▶';
+      }
+    }
+
+    function updateProgress() {
+      const fill = document.getElementById('progressFill');
+      const label = document.getElementById('progressLabel');
+      if (!fill || !label) return;
+
+      let pct = 0;
+      let text = '— / 15';
+
+      if (currentPlaying > 0) {
+        const audio = document.getElementById('audio-' + currentPlaying);
+        const chapterFrac = (currentPlaying - 1) / TOTAL_CHAPTERS;
+        let within = 0;
+        if (audio && audio.duration && isFinite(audio.duration) && audio.duration > 0) {
+          within = (audio.currentTime / audio.duration) / TOTAL_CHAPTERS;
+        }
+        pct = Math.min(100, (chapterFrac + within) * 100);
+        text = String(currentPlaying).padStart(2, '0') + ' / 15';
+      }
+
+      fill.style.width = pct + '%';
+      label.textContent = text;
+    }
+
+    /* ===== localStorage ===== */
+    function savePosition() {
+      if (currentPlaying < 1) return;
+      const audio = document.getElementById('audio-' + currentPlaying);
+      if (!audio) return;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          chapter: currentPlaying,
+          time: audio.currentTime || 0,
+          updated: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    function loadSavedPosition() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data || !data.chapter || data.chapter < 1 || data.chapter > TOTAL_CHAPTERS) return null;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearSavedPosition() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
+
+    function showResumeBanner(data) {
+      const banner = document.getElementById('resumeBanner');
+      const text = document.getElementById('resumeText');
+      if (!banner || !text) return;
+      const mins = Math.floor((data.time || 0) / 60);
+      const secs = Math.floor((data.time || 0) % 60);
+      const timeStr = mins + ':' + String(secs).padStart(2, '0');
+      text.textContent = 'Reprendre l’entrée ' + String(data.chapter).padStart(2, '0') + ' à ' + timeStr + ' ?';
+      banner.classList.add('visible');
+    }
+
+    function dismissResume() {
+      const banner = document.getElementById('resumeBanner');
+      if (banner) banner.classList.remove('visible');
+      clearSavedPosition();
+    }
+
+    function resumeFromSave() {
+      const data = loadSavedPosition();
+      const banner = document.getElementById('resumeBanner');
+      if (banner) banner.classList.remove('visible');
+      if (!data) return;
+
+      const audio = document.getElementById('audio-' + data.chapter);
+      if (!audio) return;
+
+      const start = () => {
+        try {
+          if (data.time > 2 && data.time < (audio.duration || Infinity) - 2) {
+            audio.currentTime = data.time;
+          }
+        } catch (e) {}
+        playChapter(data.chapter);
+        const art = document.querySelector('.chapter[data-chapter="' + data.chapter + '"]');
+        if (art) art.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+
+      if (audio.readyState >= 1) {
+        start();
+      } else {
+        audio.preload = 'auto';
+        audio.addEventListener('loadedmetadata', start, { once: true });
+        try { audio.load(); } catch (e) {}
+        setTimeout(start, 800);
+      }
+    }
+
     function toggleAutoplay() {
       autoplayEnabled = !autoplayEnabled;
       playToggle();
@@ -611,9 +928,6 @@
         btn.classList.add('active');
         btn.textContent = '▶▶';
         label.textContent = 'Enchaînement automatique';
-        if (currentPlaying > 0) {
-          preloadNextTwo(currentPlaying);
-        }
       } else {
         btn.classList.remove('active');
         btn.textContent = '⏸';
@@ -621,7 +935,6 @@
       }
     }
 
-    /* Précharge uniquement le chapitre indiqué (si besoin) */
     function preloadChapter(num) {
       if (num < 1 || num > TOTAL_CHAPTERS) return;
       const audio = document.getElementById('audio-' + num);
@@ -632,7 +945,6 @@
       }
     }
 
-    /* Précharge les 2 chapitres suivants (N+1 et N+2) */
     function preloadNextTwo(fromNum) {
       preloadChapter(fromNum + 1);
       preloadChapter(fromNum + 2);
@@ -647,14 +959,20 @@
       });
 
       currentPlaying = num;
-
-      // Précharge uniquement les 2 suivants
-      preloadNextTwo(num);
+      preloadedNearEnd[num] = false;
+      highlightChapter(num);
+      updateSequenceHook(num);
+      updateNavButtons();
+      updateGlobalPauseBtn();
+      updateProgress();
 
       const tryPlay = (attempt = 1) => {
         const p = audio.play();
         if (p && typeof p.then === 'function') {
-          p.then(() => {}).catch(() => {
+          p.then(() => {
+            updateGlobalPauseBtn();
+            savePosition();
+          }).catch(() => {
             if (attempt < 4) {
               setTimeout(() => tryPlay(attempt + 1), 300 * attempt);
             }
@@ -667,7 +985,6 @@
 
     function togglePlay(num) {
       playClick();
-
       const audio = document.getElementById('audio-' + num);
       if (!audio) return;
 
@@ -675,8 +992,47 @@
         playChapter(num);
       } else {
         audio.pause();
-        currentPlaying = 0;
+        savePosition();
+        updateGlobalPauseBtn();
+        // on garde currentPlaying pour la reprise / nav
       }
+    }
+
+    function toggleGlobalPause() {
+      playClick();
+      if (currentPlaying < 1) {
+        playChapter(1);
+        return;
+      }
+      const audio = document.getElementById('audio-' + currentPlaying);
+      if (!audio) return;
+
+      if (audio.paused) {
+        playChapter(currentPlaying);
+      } else {
+        audio.pause();
+        savePosition();
+        updateGlobalPauseBtn();
+      }
+    }
+
+    function goPrev() {
+      playClick();
+      const ref = currentPlaying || 1;
+      if (ref <= 1) return;
+      playChapter(ref - 1);
+      const art = document.querySelector('.chapter[data-chapter="' + (ref - 1) + '"]');
+      if (art) art.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function goNext() {
+      playClick();
+      const ref = currentPlaying || 0;
+      if (ref >= TOTAL_CHAPTERS) return;
+      const next = ref === 0 ? 1 : ref + 1;
+      playChapter(next);
+      const art = document.querySelector('.chapter[data-chapter="' + next + '"]');
+      if (art) art.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function setupAutoplayChain() {
@@ -685,18 +1041,19 @@
         if (!audio) continue;
 
         audio.addEventListener('ended', function () {
+          savePosition();
           if (!autoplayEnabled) {
-            currentPlaying = 0;
+            updateGlobalPauseBtn();
+            updateProgress();
             return;
           }
           const next = i + 1;
           if (next > TOTAL_CHAPTERS) {
-            currentPlaying = 0;
+            updateGlobalPauseBtn();
+            updateProgress();
             return;
           }
-          setTimeout(() => {
-            playChapter(next);
-          }, 350);
+          setTimeout(() => playChapter(next), 350);
         });
 
         audio.addEventListener('play', function () {
@@ -704,12 +1061,36 @@
             if (a !== audio && !a.paused) a.pause();
           });
           currentPlaying = i;
-
-          // Dès qu’un chapitre démarre → précharge les 2 suivants
-          preloadNextTwo(i);
+          highlightChapter(i);
+          updateSequenceHook(i);
+          updateNavButtons();
+          updateGlobalPauseBtn();
 
           if (!autoplayEnabled || audio.currentTime < 0.25) {
             playClick();
+          }
+        });
+
+        audio.addEventListener('pause', function () {
+          savePosition();
+          updateGlobalPauseBtn();
+        });
+
+        // Préchargement vers la FIN du chapitre (~40 s restantes)
+        audio.addEventListener('timeupdate', function () {
+          if (currentPlaying !== i) return;
+          updateProgress();
+
+          // Sauvegarde légère toutes les ~5 s
+          if (Math.floor(audio.currentTime) % 5 === 0) {
+            savePosition();
+          }
+
+          if (!audio.duration || !isFinite(audio.duration)) return;
+          const remaining = audio.duration - audio.currentTime;
+          if (remaining <= 40 && remaining > 0 && !preloadedNearEnd[i]) {
+            preloadedNearEnd[i] = true;
+            preloadNextTwo(i);
           }
         });
 
@@ -719,13 +1100,11 @@
       }
     }
 
-    /* Au démarrage : ne précharge que les 2 premiers chapitres */
     function preloadInitial() {
+      // Seulement le 1er au démarrage (le 2e se précharge vers la fin du 1er)
       preloadChapter(1);
-      preloadChapter(2);
     }
 
-    /* ===== Bouton ⋮ vitesse ===== */
     function setupCustomSpeedButtons() {
       const speeds = [0.75, 1, 1.25, 1.5, 2];
 
@@ -780,10 +1159,27 @@
       });
     }
 
-    // Initialisation
+    // Init
     setupAutoplayChain();
     setupCustomSpeedButtons();
-    preloadInitial(); // uniquement chapitres 1 et 2 au démarrage
+    preloadInitial();
+    updateNavButtons();
+    updateGlobalPauseBtn();
+    updateProgress();
+    updateSequenceHook(0);
+
+    // Proposition de reprise
+    const saved = loadSavedPosition();
+    if (saved && (saved.time > 5 || saved.chapter > 1)) {
+      showResumeBanner(saved);
+      // Précharge le chapitre sauvegardé
+      preloadChapter(saved.chapter);
+      if (saved.chapter < TOTAL_CHAPTERS) preloadChapter(saved.chapter + 1);
+    }
+
+    // Sauvegarde aussi à la fermeture de la page
+    window.addEventListener('pagehide', savePosition);
+    window.addEventListener('beforeunload', savePosition);
 
     document.addEventListener('dblclick', function(e) {
       e.preventDefault();
