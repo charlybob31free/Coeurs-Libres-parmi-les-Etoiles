@@ -38,7 +38,7 @@
     .container {
       max-width: 720px;
       margin: 0 auto;
-      padding: 20px 14px 120px;
+      padding: 20px 14px 150px;
     }
 
     /* ===== Barre de progression globale (haut) ===== */
@@ -410,11 +410,42 @@
       background: rgba(0, 0, 0, 0.94);
       border-top: 1px solid var(--border);
       backdrop-filter: blur(8px);
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .now-playing {
+      text-align: center;
+      min-height: 2.4em;
+      padding: 0 4px;
+    }
+
+    .now-playing-meta {
+      font-size: 0.78rem;
+      color: var(--green-soft);
+      letter-spacing: 0.3px;
+      opacity: 0.95;
+    }
+
+    .now-playing-title {
+      font-size: 0.88rem;
+      color: var(--green);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+      margin-top: 2px;
+    }
+
+    .bottom-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 18px;
+      gap: 14px;
+      position: relative;
     }
 
     .bottom-bar button {
@@ -433,10 +464,10 @@
     .bottom-bar button:active { transform: scale(0.93); }
 
     .nav-btn {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      font-size: 1.35rem;
+      font-size: 1.25rem;
     }
 
     .nav-btn:disabled {
@@ -445,10 +476,10 @@
     }
 
     .global-pause-btn {
-      width: 64px;
-      height: 64px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
-      font-size: 1.7rem;
+      font-size: 1.55rem;
       background: var(--green);
       color: #000;
       box-shadow: 0 0 18px rgba(57, 255, 20, 0.45);
@@ -458,6 +489,56 @@
       background: var(--card-bg);
       color: var(--green);
       box-shadow: none;
+    }
+
+    .volume-wrap {
+      position: relative;
+    }
+
+    .volume-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+    }
+
+    .volume-btn.muted {
+      opacity: 0.55;
+    }
+
+    .volume-panel {
+      display: none;
+      position: absolute;
+      bottom: 54px;
+      right: -4px;
+      background: #0a0a0a;
+      border: 1px solid var(--green);
+      border-radius: 10px;
+      padding: 12px 10px;
+      z-index: 160;
+      box-shadow: 0 0 14px rgba(57, 255, 20, 0.25);
+      width: 44px;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .volume-panel.open {
+      display: flex;
+    }
+
+    .volume-panel input[type="range"] {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 22px;
+      height: 100px;
+      accent-color: #39ff14;
+      cursor: pointer;
+    }
+
+    .volume-value {
+      font-size: 0.7rem;
+      color: var(--green-soft);
     }
 
     @media (max-width: 480px) {
@@ -510,14 +591,37 @@
       audio { height: 52px; }
 
       .nav-btn {
-        width: 46px;
-        height: 46px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.15rem;
       }
 
       .global-pause-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.6rem;
+        width: 54px;
+        height: 54px;
+        font-size: 1.45rem;
+      }
+
+      .volume-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+      }
+
+      .now-playing-meta {
+        font-size: 0.72rem;
+      }
+
+      .now-playing-title {
+        font-size: 0.82rem;
+      }
+
+      .bottom-controls {
+        gap: 12px;
+      }
+
+      .container {
+        padding-bottom: 140px;
       }
     }
   </style>
@@ -737,9 +841,22 @@
 
   <!-- Barre de navigation fixe en bas -->
   <div class="bottom-bar">
-    <button type="button" class="nav-btn" id="prevBtn" onclick="goPrev()" title="Chapitre précédent">⏮</button>
-    <button type="button" class="global-pause-btn is-paused" id="globalPauseBtn" onclick="toggleGlobalPause()" title="Lecture / Pause">▶</button>
-    <button type="button" class="nav-btn" id="nextBtn" onclick="goNext()" title="Chapitre suivant">⏭</button>
+    <div class="now-playing" id="nowPlaying">
+      <div class="now-playing-meta" id="nowPlayingMeta">—</div>
+      <div class="now-playing-title" id="nowPlayingTitle">Prêt à écouter</div>
+    </div>
+    <div class="bottom-controls">
+      <button type="button" class="nav-btn" id="prevBtn" onclick="goPrev()" title="Chapitre précédent">⏮</button>
+      <button type="button" class="global-pause-btn is-paused" id="globalPauseBtn" onclick="toggleGlobalPause()" title="Lecture / Pause">▶</button>
+      <button type="button" class="nav-btn" id="nextBtn" onclick="goNext()" title="Chapitre suivant">⏭</button>
+      <div class="volume-wrap">
+        <button type="button" class="volume-btn" id="volumeBtn" onclick="toggleVolumePanel()" title="Volume">🔊</button>
+        <div class="volume-panel" id="volumePanel">
+          <span class="volume-value" id="volumeValue">100%</span>
+          <input type="range" id="volumeSlider" min="0" max="100" value="100" orient="vertical" oninput="setVolume(this.value)">
+        </div>
+      </div>
+    </div>
   </div>
 
   <audio id="sfx-click" preload="auto" src="mixkit-sci-fi-click-900.mp3"></audio>
@@ -749,12 +866,33 @@
     let autoplayEnabled = true;
     const TOTAL_CHAPTERS = 15;
     let currentPlaying = 0;
-    let preloadedNearEnd = {}; // évite de re-précharger en boucle
+    let preloadedNearEnd = {};
+    let currentVolume = 1;
+    let savedSpeed = 1;
     const STORAGE_KEY = 'odyssee-journal-position';
+    const SPEED_KEY = 'odyssee-journal-speed';
+    const VOLUME_KEY = 'odyssee-journal-volume';
     const HOOKS = {
       1: 'Les racines brisées',
       2: 'L’éveil mutuel',
       3: 'L’étincelle rebelle'
+    };
+    const CHAPTER_TITLES = {
+      1: 'Les échos d’un passé volé',
+      2: 'Le caméléon dans la machine',
+      3: 'Connexions partagées',
+      4: 'Renaissance',
+      5: 'Nouvelle famille',
+      6: 'Alliance des ombres stellaires',
+      7: 'Éclats d’entraînement',
+      8: 'Murmures d’une lune oubliée',
+      9: 'Rythmes clandestins',
+      10: 'Ombres numériques',
+      11: 'L’écho urgent dans le vide',
+      12: 'Contre-courants dans la galaxie',
+      13: 'L’infiltration silencieuse',
+      14: 'L’éclair dans les ténèbres',
+      15: 'Lumières persistantes'
     };
 
     function playClick(volume = 1) {
@@ -793,6 +931,21 @@
       document.querySelectorAll('.chapter').forEach(ch => {
         ch.classList.toggle('playing', Number(ch.dataset.chapter) === num);
       });
+      updateNowPlaying(num);
+    }
+
+    function updateNowPlaying(num) {
+      const meta = document.getElementById('nowPlayingMeta');
+      const title = document.getElementById('nowPlayingTitle');
+      if (!meta || !title) return;
+      if (!num || num < 1) {
+        meta.textContent = '—';
+        title.textContent = 'Prêt à écouter';
+        return;
+      }
+      const seq = sequenceOf(num);
+      meta.textContent = 'Séquence ' + seq + ' · Entrée ' + String(num).padStart(2, '0');
+      title.textContent = CHAPTER_TITLES[num] || '';
     }
 
     function updateNavButtons() {
@@ -801,6 +954,84 @@
       const ref = currentPlaying || 1;
       if (prev) prev.disabled = ref <= 1;
       if (next) next.disabled = ref >= TOTAL_CHAPTERS;
+    }
+
+    /* ===== Volume ===== */
+    function applyVolumeToAll(vol) {
+      currentVolume = Math.max(0, Math.min(1, vol));
+      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+        a.volume = currentVolume;
+      });
+      try { localStorage.setItem(VOLUME_KEY, String(currentVolume)); } catch (e) {}
+
+      const btn = document.getElementById('volumeBtn');
+      const val = document.getElementById('volumeValue');
+      const slider = document.getElementById('volumeSlider');
+      if (val) val.textContent = Math.round(currentVolume * 100) + '%';
+      if (slider) slider.value = Math.round(currentVolume * 100);
+      if (btn) {
+        btn.classList.toggle('muted', currentVolume === 0);
+        btn.textContent = currentVolume === 0 ? '🔇' : (currentVolume < 0.4 ? '🔉' : '🔊');
+      }
+    }
+
+    function setVolume(percent) {
+      applyVolumeToAll(Number(percent) / 100);
+    }
+
+    function toggleVolumePanel() {
+      playClick();
+      const panel = document.getElementById('volumePanel');
+      if (!panel) return;
+      const open = panel.classList.toggle('open');
+      if (open) {
+        document.querySelectorAll('.speed-menu.open').forEach(m => m.classList.remove('open'));
+      }
+    }
+
+    function loadSavedVolume() {
+      try {
+        const v = localStorage.getItem(VOLUME_KEY);
+        if (v !== null) {
+          const n = parseFloat(v);
+          if (!isNaN(n)) applyVolumeToAll(n);
+          else applyVolumeToAll(1);
+        } else {
+          applyVolumeToAll(1);
+        }
+      } catch (e) {
+        applyVolumeToAll(1);
+      }
+    }
+
+    /* ===== Vitesse mémorisée ===== */
+    function applySpeedToAll(rate) {
+      savedSpeed = rate;
+      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+        a.playbackRate = rate;
+      });
+      try { localStorage.setItem(SPEED_KEY, String(rate)); } catch (e) {}
+      // Met à jour les menus ⋮
+      document.querySelectorAll('.speed-menu').forEach(menu => {
+        menu.querySelectorAll('button').forEach(b => {
+          const s = parseFloat(b.dataset.speed);
+          b.classList.toggle('active', s === rate);
+        });
+      });
+    }
+
+    function loadSavedSpeed() {
+      try {
+        const s = localStorage.getItem(SPEED_KEY);
+        if (s !== null) {
+          const n = parseFloat(s);
+          if (!isNaN(n) && n > 0) {
+            savedSpeed = n;
+            return n;
+          }
+        }
+      } catch (e) {}
+      return 1;
     }
 
     function updateGlobalPauseBtn() {
@@ -957,6 +1188,9 @@
       document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
         if (a !== audio && !a.paused) a.pause();
       });
+
+      audio.volume = currentVolume;
+      audio.playbackRate = savedSpeed;
 
       currentPlaying = num;
       preloadedNearEnd[num] = false;
@@ -1131,12 +1365,10 @@
           opt.type = 'button';
           opt.textContent = s === 1 ? '1× (normal)' : s + '×';
           opt.dataset.speed = s;
-          if (s === 1) opt.classList.add('active');
+          if (s === savedSpeed) opt.classList.add('active');
           opt.addEventListener('click', (e) => {
             e.stopPropagation();
-            audio.playbackRate = s;
-            menu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            opt.classList.add('active');
+            applySpeedToAll(s);
             menu.classList.remove('open');
             playClick();
           });
@@ -1154,19 +1386,28 @@
         });
       });
 
-      document.addEventListener('click', () => {
+      document.addEventListener('click', (e) => {
         document.querySelectorAll('.speed-menu.open').forEach(m => m.classList.remove('open'));
+        const panel = document.getElementById('volumePanel');
+        const wrap = document.querySelector('.volume-wrap');
+        if (panel && wrap && !wrap.contains(e.target)) {
+          panel.classList.remove('open');
+        }
       });
     }
 
     // Init
+    savedSpeed = loadSavedSpeed();
     setupAutoplayChain();
     setupCustomSpeedButtons();
+    applySpeedToAll(savedSpeed);
+    loadSavedVolume();
     preloadInitial();
     updateNavButtons();
     updateGlobalPauseBtn();
     updateProgress();
     updateSequenceHook(0);
+    updateNowPlaying(0);
 
     // Proposition de reprise
     const saved = loadSavedPosition();
