@@ -315,16 +315,6 @@
       opacity: 0.65;
     }
 
-    /* Indicateur de préchargement */
-    .preload-status {
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--green-soft);
-      opacity: 0.7;
-      margin-bottom: 12px;
-      min-height: 1.2em;
-    }
-
     @media (max-width: 480px) {
       .container {
         padding: 12px 10px 60px;
@@ -402,8 +392,6 @@
       <p class="meta">Journal de Bord • Livre audio</p>
     </header>
 
-    <div class="preload-status" id="preloadStatus">Chargement des chapitres audio…</div>
-
     <!-- ========== SÉQUENCE 1 ========== -->
     <section class="sequence">
       <h2 class="sequence-title">Séquence 1 — Les racines brisées</h2>
@@ -414,7 +402,7 @@
             <div class="chapter-number">01</div>
             <h3 class="chapter-title">Entrée 01.472-O : Les échos d’un passé volé</h3>
           </div>
-          <audio id="audio-1" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-1" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/01-entree-01.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -424,7 +412,7 @@
             <div class="chapter-number">02</div>
             <h3 class="chapter-title">Entrée 02.819-K : Le caméléon dans la machine</h3>
           </div>
-          <audio id="audio-2" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-2" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/01-entree-02.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -434,7 +422,7 @@
             <div class="chapter-number">03</div>
             <h3 class="chapter-title">Entrée 03.336-♥ : Connexions partagées</h3>
           </div>
-          <audio id="audio-3" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-3" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/01-entree-03.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -444,7 +432,7 @@
             <div class="chapter-number">04</div>
             <h3 class="chapter-title">Entrée 04.587-P : Renaissance</h3>
           </div>
-          <audio id="audio-4" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-4" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/01-entree-04.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -454,7 +442,7 @@
             <div class="chapter-number">05</div>
             <h3 class="chapter-title">Entrée 05.336-G : Nouvelle famille</h3>
           </div>
-          <audio id="audio-5" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-5" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/01-entree-05.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -472,7 +460,7 @@
             <div class="chapter-number">06</div>
             <h3 class="chapter-title">Entrée 06.214-A : Alliance des ombres stellaires</h3>
           </div>
-          <audio id="audio-6" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-6" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/02-entree-06.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -482,7 +470,7 @@
             <div class="chapter-number">07</div>
             <h3 class="chapter-title">Entrée 07.657-★ : Éclats d’entraînement</h3>
           </div>
-          <audio id="audio-7" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-7" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/02-entree-07.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -492,7 +480,7 @@
             <div class="chapter-number">08</div>
             <h3 class="chapter-title">Entrée 08.391-Ω : Murmures d’une lune oubliée</h3>
           </div>
-          <audio id="audio-8" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-8" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/02-entree-08.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -502,7 +490,7 @@
             <div class="chapter-number">09</div>
             <h3 class="chapter-title">Entrée 09.528-R : Rythmes clandestins</h3>
           </div>
-          <audio id="audio-9" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-9" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/02-entree-09.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -512,7 +500,7 @@
             <div class="chapter-number">10</div>
             <h3 class="chapter-title">Entrée 10.473-N : Ombres numériques</h3>
           </div>
-          <audio id="audio-10" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-10" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/02-entree-10.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -530,7 +518,7 @@
             <div class="chapter-number">11</div>
             <h3 class="chapter-title">Entrée 11.862-U : L’écho urgent dans le vide</h3>
           </div>
-          <audio id="audio-11" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-11" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/03-entree-11.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -540,7 +528,7 @@
             <div class="chapter-number">12</div>
             <h3 class="chapter-title">Entrée 12.139-C : Contre-courants dans la galaxie</h3>
           </div>
-          <audio id="audio-12" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-12" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/03-entree-12.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -550,7 +538,7 @@
             <div class="chapter-number">13</div>
             <h3 class="chapter-title">Entrée 13.746-I : L’infiltration silencieuse</h3>
           </div>
-          <audio id="audio-13" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-13" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/03-entree-13.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -560,7 +548,7 @@
             <div class="chapter-number">14</div>
             <h3 class="chapter-title">Entrée 14.295-F : L’éclair dans les ténèbres</h3>
           </div>
-          <audio id="audio-14" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-14" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/03-entree-14.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -570,7 +558,7 @@
             <div class="chapter-number">15</div>
             <h3 class="chapter-title">Entrée 15.917-∞ : Lumières persistantes</h3>
           </div>
-          <audio id="audio-15" controls preload="auto" controlsList="nodownload noplaybackrate noremoteplayback">
+          <audio id="audio-15" controls preload="metadata" controlsList="nodownload noplaybackrate noremoteplayback">
             <source src="audio/03-entree-15.mp3" type="audio/mpeg">
           </audio>
         </article>
@@ -623,8 +611,8 @@
         btn.classList.add('active');
         btn.textContent = '▶▶';
         label.textContent = 'Enchaînement automatique';
-        if (currentPlaying > 0 && currentPlaying < TOTAL_CHAPTERS) {
-          preloadChapter(currentPlaying + 1);
+        if (currentPlaying > 0) {
+          preloadNextTwo(currentPlaying);
         }
       } else {
         btn.classList.remove('active');
@@ -633,13 +621,21 @@
       }
     }
 
+    /* Précharge uniquement le chapitre indiqué (si besoin) */
     function preloadChapter(num) {
+      if (num < 1 || num > TOTAL_CHAPTERS) return;
       const audio = document.getElementById('audio-' + num);
       if (!audio) return;
       if (audio.readyState < 2) {
         audio.preload = 'auto';
         try { audio.load(); } catch (e) {}
       }
+    }
+
+    /* Précharge les 2 chapitres suivants (N+1 et N+2) */
+    function preloadNextTwo(fromNum) {
+      preloadChapter(fromNum + 1);
+      preloadChapter(fromNum + 2);
     }
 
     function playChapter(num) {
@@ -652,9 +648,8 @@
 
       currentPlaying = num;
 
-      if (num < TOTAL_CHAPTERS) {
-        preloadChapter(num + 1);
-      }
+      // Précharge uniquement les 2 suivants
+      preloadNextTwo(num);
 
       const tryPlay = (attempt = 1) => {
         const p = audio.play();
@@ -710,9 +705,8 @@
           });
           currentPlaying = i;
 
-          if (i < TOTAL_CHAPTERS) {
-            preloadChapter(i + 1);
-          }
+          // Dès qu’un chapitre démarre → précharge les 2 suivants
+          preloadNextTwo(i);
 
           if (!autoplayEnabled || audio.currentTime < 0.25) {
             playClick();
@@ -725,55 +719,10 @@
       }
     }
 
-    /* ===== Préchargement de TOUS les audios dès l’ouverture de la page ===== */
-    function preloadAllAudios() {
-      const status = document.getElementById('preloadStatus');
-      let loaded = 0;
-      const total = TOTAL_CHAPTERS;
-
-      function updateStatus() {
-        if (status) {
-          if (loaded >= total) {
-            status.textContent = 'Tous les chapitres sont prêts';
-            setTimeout(() => {
-              status.style.opacity = '0';
-              setTimeout(() => { status.style.display = 'none'; }, 600);
-            }, 1800);
-          } else {
-            status.textContent = 'Chargement des chapitres… ' + loaded + ' / ' + total;
-          }
-        }
-      }
-
-      for (let i = 1; i <= total; i++) {
-        const audio = document.getElementById('audio-' + i);
-        if (!audio) {
-          loaded++;
-          updateStatus();
-          continue;
-        }
-
-        audio.preload = 'auto';
-
-        const onReady = () => {
-          loaded++;
-          updateStatus();
-          audio.removeEventListener('canplaythrough', onReady);
-          audio.removeEventListener('loadeddata', onReady);
-        };
-
-        // Si déjà assez chargé
-        if (audio.readyState >= 3) {
-          loaded++;
-          updateStatus();
-        } else {
-          audio.addEventListener('canplaythrough', onReady);
-          audio.addEventListener('loadeddata', onReady);
-          try { audio.load(); } catch (e) {}
-        }
-      }
-
-      updateStatus();
+    /* Au démarrage : ne précharge que les 2 premiers chapitres */
+    function preloadInitial() {
+      preloadChapter(1);
+      preloadChapter(2);
     }
 
     /* ===== Bouton ⋮ vitesse ===== */
@@ -834,7 +783,7 @@
     // Initialisation
     setupAutoplayChain();
     setupCustomSpeedButtons();
-    preloadAllAudios();
+    preloadInitial(); // uniquement chapitres 1 et 2 au démarrage
 
     document.addEventListener('dblclick', function(e) {
       e.preventDefault();
