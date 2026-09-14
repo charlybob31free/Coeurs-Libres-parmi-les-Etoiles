@@ -515,9 +515,9 @@
 
   <!-- Contrôle d’enchaînement automatique (fixe haut droite) -->
   <div class="autoplay-control">
-    <div class="autoplay-label" id="autoplayLabel">Chapitres isolés</div>
-    <button class="autoplay-btn" id="autoplayBtn" onclick="toggleAutoplay()" title="Activer / désactiver l’enchaînement">
-      ⏸
+    <div class="autoplay-label" id="autoplayLabel">Enchaînement automatique</div>
+    <button class="autoplay-btn active" id="autoplayBtn" onclick="toggleAutoplay()" title="Activer / désactiver l’enchaînement">
+      ▶▶
     </button>
   </div>
 
@@ -870,8 +870,9 @@
     }
 
     /* ========== LECTEUR ORIGINAL ========== */
-    let autoplayEnabled = false;
+    let autoplayEnabled = true;
     const TOTAL_CHAPTERS = 15;
+    let currentPlaying = 0; // numéro du chapitre en cours (1-15)
 
     function playToggle() {
       const sfx = document.getElementById('sfx-toggle');
@@ -891,11 +892,60 @@
         btn.classList.add('active');
         btn.textContent = '▶▶';
         label.textContent = 'Enchaînement automatique';
+        // Précharge le chapitre suivant s'il y en a un en cours
+        if (currentPlaying > 0 && currentPlaying < TOTAL_CHAPTERS) {
+          preloadChapter(currentPlaying + 1);
+        }
       } else {
         btn.classList.remove('active');
         btn.textContent = '⏸';
         label.textContent = 'Chapitres isolés';
       }
+    }
+
+    function preloadChapter(num) {
+      const audio = document.getElementById('audio-' + num);
+      if (!audio) return;
+      // Force le navigateur à commencer à charger le fichier
+      if (audio.readyState < 2) {
+        audio.preload = 'auto';
+        audio.load();
+      }
+    }
+
+    function playChapter(num, fromAutoplay = false) {
+      const audio = document.getElementById('audio-' + num);
+      if (!audio) return;
+
+      // Arrête tous les autres
+      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+        if (a !== audio && !a.paused) {
+          a.pause();
+        }
+      });
+
+      currentPlaying = num;
+
+      // Précharge le suivant pour un enchaînement fluide
+      if (num < TOTAL_CHAPTERS) {
+        preloadChapter(num + 1);
+      }
+
+      const tryPlay = (attempt = 1) => {
+        const p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            // Lecture démarrée avec succès
+          }).catch(() => {
+            // Échec (souvent politique autoplay ou fichier pas encore prêt)
+            if (attempt < 4) {
+              setTimeout(() => tryPlay(attempt + 1), 300 * attempt);
+            }
+          });
+        }
+      };
+
+      tryPlay();
     }
 
     function togglePlay(num) {
@@ -904,14 +954,11 @@
       const audio = document.getElementById('audio-' + num);
       if (!audio) return;
 
-      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
-        if (a !== audio && !a.paused) a.pause();
-      });
-
       if (audio.paused) {
-        audio.play().catch(() => {});
+        playChapter(num, false);
       } else {
         audio.pause();
+        currentPlaying = 0;
       }
     }
 
@@ -920,28 +967,44 @@
         const audio = document.getElementById('audio-' + i);
         if (!audio) continue;
 
+        // Quand un chapitre se termine → lance le suivant si mode auto
         audio.addEventListener('ended', function () {
-          if (!autoplayEnabled) return;
-          const next = i + 1;
-          if (next > TOTAL_CHAPTERS) return;
-          const nextAudio = document.getElementById('audio-' + next);
-          if (nextAudio) {
-            setTimeout(() => {
-              nextAudio.play().catch(() => {});
-            }, 450);
+          if (!autoplayEnabled) {
+            currentPlaying = 0;
+            return;
           }
+          const next = i + 1;
+          if (next > TOTAL_CHAPTERS) {
+            currentPlaying = 0;
+            return;
+          }
+          // Petite pause puis lecture du suivant (avec retry intégré)
+          setTimeout(() => {
+            playChapter(next, true);
+          }, 350);
         });
 
+        // Quand un audio démarre (titre ou bouton natif) → stoppe les autres
         audio.addEventListener('play', function () {
-          // Stoppe tous les autres audios dès qu'un nouveau démarre
-          // (que ce soit via le titre ou le bouton play natif)
           document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
             if (a !== audio && !a.paused) a.pause();
           });
+          currentPlaying = i;
 
-          if (!autoplayEnabled || audio.currentTime < 0.3) {
+          // Précharge le suivant
+          if (i < TOTAL_CHAPTERS) {
+            preloadChapter(i + 1);
+          }
+
+          // Son de clic uniquement sur action manuelle (pas à chaque enchaînement)
+          if (!autoplayEnabled || audio.currentTime < 0.25) {
             playClick();
           }
+        });
+
+        // En cas d'erreur de chargement, on log discrètement
+        audio.addEventListener('error', function () {
+          console.warn('Erreur audio chapitre ' + i, audio.error);
         });
       }
     }
