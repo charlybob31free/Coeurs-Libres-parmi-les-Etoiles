@@ -19,6 +19,16 @@
       --seq-bg: #051405;
     }
 
+    /* Mode nuit : vert plus doux pour les yeux */
+    body.night-mode {
+      --green: #7cbf6a;
+      --green-dim: #4a8f3a;
+      --green-soft: #6a9f5a;
+      --card-bg: #080a08;
+      --border: #2a3a2a;
+      --seq-bg: #0a120a;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -146,15 +156,6 @@
       color: var(--green-soft);
       opacity: 0.9;
       margin-bottom: 8px;
-    }
-
-    .sequence-hook {
-      font-size: clamp(0.9rem, 3.5vw, 1.05rem);
-      color: var(--green);
-      opacity: 0.8;
-      margin-bottom: 8px;
-      min-height: 1.4em;
-      transition: opacity 0.3s;
     }
 
     .meta {
@@ -299,8 +300,6 @@
     audio::-webkit-media-controls-panel { background: #111; }
 
     audio::-webkit-media-controls-play-button,
-    audio::-webkit-media-controls-mute-button,
-    audio::-webkit-media-controls-volume-slider,
     audio::-webkit-media-controls-timeline {
       filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
     }
@@ -310,10 +309,15 @@
       color: #39ff14;
     }
 
+    /* Masquer volume / mute des lecteurs individuels (géré par la barre du bas) */
+    audio::-webkit-media-controls-mute-button,
+    audio::-webkit-media-controls-volume-slider,
+    audio::-webkit-media-controls-volume-control-container,
     audio::-webkit-media-controls-overflow-button {
       display: none !important;
       opacity: 0 !important;
       width: 0 !important;
+      max-width: 0 !important;
       pointer-events: none !important;
     }
 
@@ -440,6 +444,13 @@
       margin-top: 2px;
     }
 
+    .now-playing-title.finished {
+      color: #ff3333;
+      text-shadow: 0 0 8px rgba(255, 50, 50, 0.45);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
     .bottom-controls {
       display: flex;
       align-items: center;
@@ -541,6 +552,13 @@
       color: var(--green-soft);
     }
 
+    .theme-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      font-size: 1.25rem;
+    }
+
     @media (max-width: 480px) {
       .container {
         padding: 12px 10px 120px;
@@ -602,7 +620,8 @@
         font-size: 1.45rem;
       }
 
-      .volume-btn {
+      .volume-btn,
+      .theme-btn {
         width: 44px;
         height: 44px;
         font-size: 1.1rem;
@@ -646,7 +665,6 @@
     <header>
       <h1 class="main-title">L’Odyssée des Âmes Nomades</h1>
       <p class="sub-title">Cœurs Libres parmi les Étoiles</p>
-      <p class="sequence-hook" id="sequenceHook">Les racines brisées</p>
       <p class="meta">Journal de Bord • Livre audio</p>
     </header>
 
@@ -856,6 +874,7 @@
           <input type="range" id="volumeSlider" min="0" max="100" value="100" orient="vertical" oninput="setVolume(this.value)">
         </div>
       </div>
+      <button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Mode jour / nuit">🌙</button>
     </div>
   </div>
 
@@ -872,11 +891,8 @@
     const STORAGE_KEY = 'odyssee-journal-position';
     const SPEED_KEY = 'odyssee-journal-speed';
     const VOLUME_KEY = 'odyssee-journal-volume';
-    const HOOKS = {
-      1: 'Les racines brisées',
-      2: 'L’éveil mutuel',
-      3: 'L’étincelle rebelle'
-    };
+    const THEME_KEY = 'odyssee-journal-theme';
+    let storyFinished = false;
     const CHAPTER_TITLES = {
       1: 'Les échos d’un passé volé',
       2: 'Le caméléon dans la machine',
@@ -920,13 +936,6 @@
       return 3;
     }
 
-    function updateSequenceHook(num) {
-      const el = document.getElementById('sequenceHook');
-      if (!el) return;
-      const seq = num > 0 ? sequenceOf(num) : 1;
-      el.textContent = HOOKS[seq] || HOOKS[1];
-    }
-
     function highlightChapter(num) {
       document.querySelectorAll('.chapter').forEach(ch => {
         ch.classList.toggle('playing', Number(ch.dataset.chapter) === num);
@@ -938,14 +947,42 @@
       const meta = document.getElementById('nowPlayingMeta');
       const title = document.getElementById('nowPlayingTitle');
       if (!meta || !title) return;
+      if (storyFinished) {
+        meta.textContent = '—';
+        title.textContent = 'FIN DE TRANSMISSION…';
+        title.classList.add('finished');
+        return;
+      }
+      title.classList.remove('finished');
       if (!num || num < 1) {
         meta.textContent = '—';
         title.textContent = 'Prêt à écouter';
         return;
       }
       const seq = sequenceOf(num);
-      meta.textContent = 'Séquence ' + seq + ' · Entrée ' + String(num).padStart(2, '0');
+      meta.textContent = 'S' + seq + ' · Entrée ' + String(num).padStart(2, '0');
       title.textContent = CHAPTER_TITLES[num] || '';
+    }
+
+    function toggleTheme() {
+      playClick();
+      const isNight = document.body.classList.toggle('night-mode');
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = isNight ? '☀️' : '🌙';
+      try {
+        localStorage.setItem(THEME_KEY, isNight ? 'night' : 'day');
+      } catch (e) {}
+    }
+
+    function loadTheme() {
+      try {
+        const t = localStorage.getItem(THEME_KEY);
+        if (t === 'night') {
+          document.body.classList.add('night-mode');
+          const btn = document.getElementById('themeBtn');
+          if (btn) btn.textContent = '☀️';
+        }
+      } catch (e) {}
     }
 
     function updateNavButtons() {
@@ -1185,6 +1222,8 @@
       const audio = document.getElementById('audio-' + num);
       if (!audio) return;
 
+      storyFinished = false;
+
       document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
         if (a !== audio && !a.paused) a.pause();
       });
@@ -1195,7 +1234,6 @@
       currentPlaying = num;
       preloadedNearEnd[num] = false;
       highlightChapter(num);
-      updateSequenceHook(num);
       updateNavButtons();
       updateGlobalPauseBtn();
       updateProgress();
@@ -1234,6 +1272,15 @@
 
     function toggleGlobalPause() {
       playClick();
+      // Après la fin de l’histoire → relancer depuis le début
+      if (storyFinished) {
+        storyFinished = false;
+        clearSavedPosition();
+        playChapter(1);
+        const art = document.querySelector('.chapter[data-chapter="1"]');
+        if (art) art.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       if (currentPlaying < 1) {
         playChapter(1);
         return;
@@ -1248,6 +1295,21 @@
         savePosition();
         updateGlobalPauseBtn();
       }
+    }
+
+    function markStoryFinished() {
+      storyFinished = true;
+      currentPlaying = 0;
+      highlightChapter(0);
+      updateNowPlaying(0);
+      updateGlobalPauseBtn();
+      updateProgress();
+      updateNavButtons();
+      clearSavedPosition();
+      const fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = '100%';
+      const label = document.getElementById('progressLabel');
+      if (label) label.textContent = '15 / 15';
     }
 
     function goPrev() {
@@ -1276,13 +1338,12 @@
 
         audio.addEventListener('ended', function () {
           savePosition();
-          if (!autoplayEnabled) {
-            updateGlobalPauseBtn();
-            updateProgress();
-            return;
-          }
           const next = i + 1;
           if (next > TOTAL_CHAPTERS) {
+            markStoryFinished();
+            return;
+          }
+          if (!autoplayEnabled) {
             updateGlobalPauseBtn();
             updateProgress();
             return;
@@ -1294,9 +1355,9 @@
           document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
             if (a !== audio && !a.paused) a.pause();
           });
+          storyFinished = false;
           currentPlaying = i;
           highlightChapter(i);
-          updateSequenceHook(i);
           updateNavButtons();
           updateGlobalPauseBtn();
 
@@ -1406,8 +1467,8 @@
     updateNavButtons();
     updateGlobalPauseBtn();
     updateProgress();
-    updateSequenceHook(0);
     updateNowPlaying(0);
+    loadTheme();
 
     // Proposition de reprise
     const saved = loadSavedPosition();
