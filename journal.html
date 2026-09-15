@@ -875,7 +875,7 @@
           <input type="range" id="volumeSlider" min="0" max="100" value="100" orient="vertical" oninput="setVolume(this.value)">
         </div>
       </div>
-      <button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Mode jour / nuit">🌙</button>
+      <button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Mode jour / nuit">☀️</button>
     </div>
   </div>
 
@@ -974,7 +974,8 @@
       playClick();
       const isNight = document.body.classList.toggle('night-mode');
       const btn = document.getElementById('themeBtn');
-      if (btn) btn.textContent = isNight ? '☀️' : '🌙';
+      // Icône = mode actuel : soleil en jour, lune en nuit
+      if (btn) btn.textContent = isNight ? '🌙' : '☀️';
       try {
         localStorage.setItem(THEME_KEY, isNight ? 'night' : 'day');
       } catch (e) {}
@@ -983,12 +984,20 @@
     function loadTheme() {
       try {
         const t = localStorage.getItem(THEME_KEY);
+        const btn = document.getElementById('themeBtn');
         if (t === 'night') {
           document.body.classList.add('night-mode');
-          const btn = document.getElementById('themeBtn');
+          if (btn) btn.textContent = '🌙';
+        } else {
+          // Premier démarrage ou mode jour mémorisé
+          document.body.classList.remove('night-mode');
           if (btn) btn.textContent = '☀️';
         }
-      } catch (e) {}
+      } catch (e) {
+        document.body.classList.remove('night-mode');
+        const btn = document.getElementById('themeBtn');
+        if (btn) btn.textContent = '☀️';
+      }
     }
 
     function updateNavButtons() {
