@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>L’Odyssée des Âmes Nomades – Connexion</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+
+  <!-- Police Block Craft -->
+  <link href="https://fonts.cdnfonts.com/css/block-craft" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000000;
+      --green: #39ff14;
+      --green-soft: #00cc66;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Block Craft', 'Courier New', monospace;
+      min-height: 100vh;
+      line-height: 1.45;
+      overflow: hidden;
+    }
+
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 18px;
+      overflow: hidden;
+    }
+
+    #boot-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+    }
+
+    .boot-terminal {
+      width: 100%;
+      max-width: 640px;
+      font-size: clamp(1.15rem, 4.8vw, 1.35rem);
+      line-height: 1.5;
+      color: var(--green);
+      text-shadow: 0 0 6px rgba(57, 255, 20, 0.35);
+    }
+
+    .boot-line {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .boot-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .boot-line.final {
+      margin-top: 18px;
+      font-size: 1.15em;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px rgba(57, 255, 20, 0.6);
+    }
+
+    .boot-start {
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 20px;
+    }
+
+    .boot-start .prompt {
+      opacity: 0.9;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .boot-start .hint {
+      margin-top: 14px;
+      font-size: 0.75em;
+      opacity: 0.55;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 1; }
+    }
+
+    .encrypt-bars {
+      display: inline;
+      letter-spacing: 2px;
+    }
+
+    .encrypt-bars span {
+      opacity: 0.25;
+      transition: opacity 0.12s ease;
+    }
+
+    .encrypt-bars span.on {
+      opacity: 1;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
+    }
+
+    @media (max-width: 480px) {
+      .boot-terminal {
+        font-size: clamp(1.2rem, 5vw, 1.4rem);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="boot-screen">
+    <div class="boot-terminal" id="bootTerminal"></div>
+  </div>
+
+  <!-- Son de clic pour l’intro -->
+  <audio id="sfx-click" preload="auto" src="mixkit-sci-fi-click-900.mp3"></audio>
+
+  <script>
+    const bootMessages = [
+      { text: "[Connexion établie...]", delay: 520 },
+      { text: "[Paquet de données détecté]", delay: 480 },
+      { text: "[Analyse de sécurité...]", delay: 560 },
+      { text: "[Anti-malware : ACTIVÉ]", delay: 420 },
+      { text: "[Recherche d'intrusions...]", delay: 580 },
+      { text: "[Aucune menace détectée]", delay: 460 },
+      { text: "[Chiffrement : ", special: "encrypt", delay: 180 },
+      { text: "[Algorithme de décryptage initialisé...]", delay: 520 },
+      { text: "", special: "percent", delay: 380 },
+      { text: "[Décryptage terminé]", delay: 440 },
+      { text: "[Archive récupérée : LES ÉCHOS D’UN PASSÉ VOLÉ]", delay: 620 },
+      { text: "[LECTURE.]", delay: 950, final: true }
+    ];
+
+    function playClick(volume = 1) {
+      const sfx = document.getElementById('sfx-click');
+      if (!sfx) return;
+      try {
+        sfx.pause();
+        sfx.currentTime = 0;
+        sfx.volume = Math.max(0, Math.min(1, volume));
+        const p = sfx.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch (e) {}
+    }
+
+    function runBootSequence() {
+      const terminal = document.getElementById('bootTerminal');
+      const bootScreen = document.getElementById('boot-screen');
+      let i = 0;
+
+      function showNext() {
+        if (i >= bootMessages.length) {
+          // Après [LECTURE.] → redirection vers le Journal de bord
+          setTimeout(() => {
+            bootScreen.classList.add('hidden');
+            setTimeout(() => {
+              window.location.href = 'journal.html';
+            }, 700);
+          }, 1100);
+          return;
+        }
+
+        const msg = bootMessages[i];
+        const line = document.createElement('div');
+        line.className = 'boot-line' + (msg.final ? ' final' : '');
+
+        if (msg.special === 'encrypt') {
+          line.innerHTML = '[Chiffrement : <span class="encrypt-bars" id="encryptBars"></span> ]';
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+
+          const barsContainer = document.getElementById('encryptBars');
+          const bars = [];
+          for (let b = 0; b < 10; b++) {
+            const span = document.createElement('span');
+            span.textContent = '█';
+            barsContainer.appendChild(span);
+            bars.push(span);
+          }
+
+          let barIndex = 0;
+          function lightNextBar() {
+            if (barIndex < bars.length) {
+              bars[barIndex].classList.add('on');
+              barIndex++;
+              setTimeout(lightNextBar, 200);
+            } else {
+              setTimeout(() => {
+                i++;
+                showNext();
+              }, 450);
+            }
+          }
+          setTimeout(lightNextBar, 220);
+
+        } else if (msg.special === 'percent') {
+          const steps = [
+            '[12 %...]',
+            '[12 %... 37 %...]',
+            '[12 %... 37 %... 68 %...]',
+            '[12 %... 37 %... 68 %... 94 %...]'
+          ];
+          line.textContent = steps[0];
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+
+          let step = 1;
+          function nextPercent() {
+            if (step < steps.length) {
+              line.textContent = steps[step];
+              step++;
+              setTimeout(nextPercent, 480);
+            } else {
+              i++;
+              setTimeout(showNext, 420);
+            }
+          }
+          setTimeout(nextPercent, 520);
+
+        } else {
+          line.textContent = msg.text;
+          terminal.appendChild(line);
+          playClick(0.25);
+          requestAnimationFrame(() => line.classList.add('visible'));
+          i++;
+          setTimeout(showNext, msg.delay);
+        }
+      }
+
+      setTimeout(showNext, 280);
+    }
+
+    function showStartPrompt() {
+      const terminal = document.getElementById('bootTerminal');
+      terminal.innerHTML = '';
+      const start = document.createElement('div');
+      start.className = 'boot-start';
+      start.innerHTML = '<div class="prompt">[ TOUCHER POUR ÉTABLIR LA CONNEXION ]</div><div class="hint">Appuyez n’importe où pour continuer</div>';
+      terminal.appendChild(start);
+
+      function begin() {
+        playClick(0.25);
+        terminal.innerHTML = '';
+        document.removeEventListener('click', begin);
+        document.removeEventListener('touchstart', begin);
+        runBootSequence();
+      }
+
+      document.addEventListener('click', begin, { once: true });
+      document.addEventListener('touchstart', begin, { once: true, passive: true });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showStartPrompt);
+    } else {
+      showStartPrompt();
+    }
+  </script>
+</body>
+</html>
