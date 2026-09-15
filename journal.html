@@ -1218,7 +1218,17 @@
       preloadChapter(fromNum + 2);
     }
 
-    function playChapter(num) {
+    function resetAllAudioPositions() {
+      document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+        try {
+          a.pause();
+          a.currentTime = 0;
+        } catch (e) {}
+      });
+      preloadedNearEnd = {};
+    }
+
+    function playChapter(num, fromStart) {
       const audio = document.getElementById('audio-' + num);
       if (!audio) return;
 
@@ -1231,6 +1241,10 @@
       audio.volume = currentVolume;
       audio.playbackRate = savedSpeed;
 
+      if (fromStart) {
+        try { audio.currentTime = 0; } catch (e) {}
+      }
+
       currentPlaying = num;
       preloadedNearEnd[num] = false;
       highlightChapter(num);
@@ -1239,9 +1253,16 @@
       updateProgress();
 
       const tryPlay = (attempt = 1) => {
+        // S’assurer que la position est bien au début avant de jouer
+        if (fromStart && attempt === 1) {
+          try { audio.currentTime = 0; } catch (e) {}
+        }
         const p = audio.play();
         if (p && typeof p.then === 'function') {
           p.then(() => {
+            if (fromStart && audio.currentTime > 1) {
+              try { audio.currentTime = 0; } catch (e) {}
+            }
             updateGlobalPauseBtn();
             savePosition();
           }).catch(() => {
@@ -1272,11 +1293,12 @@
 
     function toggleGlobalPause() {
       playClick();
-      // Après la fin de l’histoire → relancer depuis le début
+      // Après la fin de l’histoire → relancer TOUJOURS depuis le début
       if (storyFinished) {
         storyFinished = false;
         clearSavedPosition();
-        playChapter(1);
+        resetAllAudioPositions();
+        playChapter(1, true);
         const art = document.querySelector('.chapter[data-chapter="1"]');
         if (art) art.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
@@ -1300,6 +1322,8 @@
     function markStoryFinished() {
       storyFinished = true;
       currentPlaying = 0;
+      // Remet toutes les positions audio à 0 pour le prochain lancement
+      resetAllAudioPositions();
       highlightChapter(0);
       updateNowPlaying(0);
       updateGlobalPauseBtn();
